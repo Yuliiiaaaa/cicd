@@ -13,14 +13,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Важно для получения всей истории коммитов
+          fetch-depth: 0
 
-      - name: Verify requirements.txt exists
+      - name: Verify files
         run: |
           ls -la
+          [ -f requirements.txt ] || exit 1
+          echo "requirements.txt exists"
           cat requirements.txt
-          echo "Dockerfile content:"
-          cat Dockerfile
+
+      - name: Create Docker context
+        run: |
+          mkdir -p docker_context
+          cp Dockerfile docker_context/
+          cp requirements.txt docker_context/
+          cd docker_context && ls -la
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -34,9 +41,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ./Dockerfile
+          context: ./docker_context
+          file: ./docker_context/Dockerfile
           push: true
           tags: ${{ vars.DOCKERHUB_USERNAME }}/my-app:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
