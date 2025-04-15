@@ -26,7 +26,6 @@ jobs:
         run: |
           mkdir -p docker_context
           cp Dockerfile docker_context/
-          cp requirements.txt docker_context/
           cd docker_context && ls -la
 
       - name: Set up Docker Buildx
